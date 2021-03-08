@@ -1,9 +1,9 @@
 
 // GPIO pin declarations:
 // input
-#define analogIn A0  // pin to connect mic module
-#define digitalIn 2  // digital pin
-#define resetPIN 3   // reset button pin (pull-down resistor to eliminate metastability)
+#define analogIn  A0  // pin to connect mic module
+#define digitalIn 2   // digital input
+#define resetPIN  3   // reset button
 // output
 
 
