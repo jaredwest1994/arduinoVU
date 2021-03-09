@@ -17,13 +17,17 @@
 
 CRGBArray<NUM_LEDS> leds; // creates array with NUM_LEDS number of elements
 
+// Time values
+#define second    1000
+#define tenthSec  100
+#define hundSec   10
 
 int dig;            // digital input read value
 int ana;            // analog input read value (signal from mic module)
 bool reset;         // resets meanValue and calibrates
 
 int sound = 0;      // value of the volume
-int maxSound = 0;   // maximum sound value
+int maxSound = 500; // maximum sound value <variable>
 int mean = 0;       // value when no sound
 int sum = 0;        // temporary variable to find average
 int counter;        // value to count average to
@@ -31,30 +35,33 @@ int counter;        // value to count average to
 int ledToLight;     // stores the number of LEDs to light
 
 //function to reset the mean value over 1 second
-int meanValue(){
+int meanValue(int timeValue){
+  int meanVal = 0;
+  sum = 0;
   for(counter = 1; counter <= 10; counter++){  
       sum = sum + analogRead(analogIn);      
-      delay(100);
+      delay(timeValue);
     }
-  mean = sum/(counter-1);
   if (counter > 10) {
+    meanVal = sum/(counter-1);
     sum = 0;
   }
+  return meanVal;
 }
 
 
 void light(){
-  ledToLight = map(sound, 0, 600, 1, NUM_LEDS); 
+  ledToLight = map(sound, 0, maxSound, 1, NUM_LEDS); 
   
   if (sound >= maxSound) {
     maxSound = sound;
   }
   
-  Serial.print(sound);
-  Serial.print("  |  ");
-  Serial.print(maxSound);
-  Serial.print("  |  ");
-  Serial.println(ledToLight);
+//  Serial.print(sound);
+//  Serial.print("  |  ");
+//  Serial.print(maxSound);
+//  Serial.print("  |  ");
+//  Serial.println(ledToLight);
 }
 
 void setup() {
@@ -72,10 +79,10 @@ void setup() {
 
   for(counter = 1; counter <= 10; counter++){  
       sum = sum + analogRead(analogIn);      
-      delay(100);
+      delay(tenthSec);
   }
-  mean = sum/(counter-1);
   if (counter > 10) {
+    mean = sum/(counter-1);
     sum = 0;
   }
   
@@ -85,17 +92,18 @@ void loop() {
   
   ana = analogRead(analogIn);
   reset = digitalRead(resetPIN);
-  delay(100);
+  delay(hundSec);
 
   //Function to calibrate the sensor to mean value
   if (reset) {
-    meanValue();
+    mean = meanValue(tenthSec);
   }
   else {
-    sound = abs(ana - mean);
+    sound = meanValue(hundSec);
+    sound = abs(sound - mean);
   }
   light();  // decides number of LEDS to light
-//
+
 //  Serial.print(ana);
 //  Serial.print("  |  ");
 //  Serial.print(mean);
@@ -104,5 +112,5 @@ void loop() {
 //  Serial.println("  |  ");
   
   
-  //Serial.println(sound);
+  Serial.println(sound);
 }
